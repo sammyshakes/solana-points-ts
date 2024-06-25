@@ -35,6 +35,8 @@ This project includes a pre-configured admin wallet for use on the Solana devnet
 
 The project is set up to use Solana's devnet. If you need to change this, modify the `SOLANA_NETWORK` variable in the `.env` file.
 
+---
+
 # Documentation
 
 The project consists of two main scripts:
@@ -46,7 +48,7 @@ The project consists of two main scripts:
 
 The wallet manager script (`wallet-manager.ts`) is used for creating and managing wallets.
 
-#### Creating the Admin Wallet
+### Creating the Admin Wallet
 
 ```bash
 npx ts-node src/wallet-manager.ts create-admin
@@ -59,7 +61,9 @@ New admin keypair generated and saved to admin_keypair.json
 Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 ```
 
-#### Checking Admin Wallet Balance
+---
+
+### Checking Admin Wallet Balance
 
 ```bash
 npx ts-node src/wallet-manager.ts check-balance
@@ -72,7 +76,9 @@ Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 Admin balance: 0.9955852 SOL
 ```
 
-#### Creating a User Keypair
+---
+
+### Creating a User Keypair
 
 ```bash
 npx ts-node src/wallet-manager.ts create-user <username>
@@ -88,7 +94,7 @@ Keypair saved to: /path/to/project/user_keypairs/alice_keypair.json
 
 ## Solana Points Script
 
-#### Creating a new Brand Mint
+### Creating a new Brand Mint
 
 ```bash
 npx ts-node src/solana-points.ts create-brand "Your Brand Name" SYMBOL
@@ -102,7 +108,9 @@ Created brand mint: 4uhztZYdeNWm6oWay8v6dtuyshLSAv2v3srewf27hkRd
 Admin balance: 0.9941136 SOL
 ```
 
-#### Minting Tokens
+---
+
+### Minting Tokens
 
 ```bash
 npx ts-node src/solana-points.ts mint-tokens <brand-mint-address> <user-wallet-address> <amount>
@@ -114,7 +122,9 @@ Example output:
 Minted 1000 tokens to user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 ```
 
-#### Burning Tokens
+---
+
+### Burning Tokens
 
 ```bash
 npx ts-node src/solana-points.ts burn-tokens <brand-mint-address> <user-wallet-address> <amount>
@@ -126,7 +136,9 @@ Example output:
 Burned 100 tokens from user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 ```
 
-#### Checking Token Balance
+---
+
+### Checking Token Balance
 
 ```bash
 npx ts-node src/solana-points.ts check-token-balance <brand-mint-address> <user-wallet-address>
@@ -139,7 +151,9 @@ Token balance for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
 1000 tokens of mint 4uhztZYdeNWm6oWay8v6dtuyshLSAv2v3srewf27hkRd
 ```
 
-#### Checking Admin Wallet Balance
+---
+
+### Checking Admin Wallet Balance
 
 ```bash
 npx ts-node src/solana-points.ts check-balance
@@ -152,7 +166,9 @@ Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 Admin balance: 0.9941136 SOL
 ```
 
-#### Getting All Brand Balances for a Wallet
+---
+
+### Getting All Brand Balances for a Wallet
 
 ```bash
 npx ts-node src/solana-points.ts get-all-balances <wallet-address>
