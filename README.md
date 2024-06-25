@@ -354,9 +354,9 @@ If you need to create a new admin wallet, follow these steps:
 ## Notes
 
 - All operations are performed on the Solana devnet. Do not use real funds.
-- For demo purposes, the admin wallet (`admin_keypair.json`): `GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM` is already provided along with one or more user keys.
+- For demo purposes, the admin wallet (`admin_keypair.json`): `GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM` is already provided.
 - Make sure the admin wallet has sufficient SOL to perform operations.
-- User keypairs are stored in the `user_keypairs` directory.
+- Created user keypairs are stored in the `user_keypairs` directory.
 - In a production environment, users would create their own wallets and provide their public keys.
-- The `brand_mints.json` file will be created in the project root directory to store information about created brand mints.
-- The wallet manager (`wallet-manager.ts`) is used for creating both admin and user keypairs. It can be used to set up new wallets before interacting with the Solana Points System.
+- Created Brand mint information will be stored in the `brand_mints.json` file in the project root directory.
+- The wallet manager (`wallet-manager.ts`) is used for creating both admin and user keypairs and can be used to set up new wallets before interacting with the Solana Points System.
