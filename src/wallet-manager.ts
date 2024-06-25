@@ -5,6 +5,7 @@ import {
   TransactionConfirmationStrategy,
 } from '@solana/web3.js';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as dotenv from 'dotenv';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -82,6 +83,22 @@ async function airdropToAdmin(): Promise<void> {
   }
 }
 
+function createUserKeypair(username: string): void {
+  const userKeypair = Keypair.generate();
+  const userDir = path.join(__dirname, '..', 'user_keypairs');
+
+  if (!fs.existsSync(userDir)) {
+    fs.mkdirSync(userDir, { recursive: true });
+  }
+
+  const filePath = path.join(userDir, `${username}_keypair.json`);
+  fs.writeFileSync(filePath, JSON.stringify(Array.from(userKeypair.secretKey)));
+
+  console.log(`Created user keypair for ${username}`);
+  console.log(`Public key: ${userKeypair.publicKey.toBase58()}`);
+  console.log(`Keypair saved to: ${filePath}`);
+}
+
 yargs(hideBin(process.argv))
   .command('create-wallet', 'Create a new admin wallet', {}, async () => {
     try {
@@ -111,6 +128,24 @@ yargs(hideBin(process.argv))
       console.error('Error performing airdrop:', error);
     }
   })
+  .command(
+    'create-user <username>',
+    'Create a new user keypair',
+    (yargs: yargs.Argv) => {
+      return yargs.positional('username', {
+        describe: 'Username for the new keypair',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    (argv: { username: string }) => {
+      try {
+        createUserKeypair(argv.username);
+      } catch (error) {
+        console.error('Error creating user keypair:', error);
+      }
+    }
+  )
   .help()
   .strict()
   .parse();

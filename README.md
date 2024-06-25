@@ -44,9 +44,24 @@ The project consists of two main scripts:
 
 ## Wallet Manager
 
-#### Check the admin wallet balance:
+The wallet manager script (`wallet-manager.ts`) is used for creating and managing wallets.
+
+#### Creating the Admin Wallet
+
+```bash
+npx ts-node src/wallet-manager.ts create-admin
+```
+
+Example output:
 
 ```
+New admin keypair generated and saved to admin_keypair.json
+Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+```
+
+#### Checking Admin Wallet Balance
+
+```bash
 npx ts-node src/wallet-manager.ts check-balance
 ```
 
@@ -55,6 +70,20 @@ Example output:
 ```
 Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 Admin balance: 0.9955852 SOL
+```
+
+#### Creating a User Keypair
+
+```bash
+npx ts-node src/wallet-manager.ts create-user <username>
+```
+
+Example output:
+
+```
+Created user keypair for alice
+Public key: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
+Keypair saved to: /path/to/project/user_keypairs/alice_keypair.json
 ```
 
 ## Solana Points Script
@@ -283,6 +312,17 @@ Follow these steps to create a brand, mint tokens, and check balances:
     New Brand: 500
     ```
 
+11. **Create a user keypair**
+    ```bash
+    npx ts-node src/wallet-manager.ts create-user alice
+    ```
+    Example output:
+    ```
+    Created user keypair for alice
+    Public key: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
+    Keypair saved to: /path/to/project/user_keypairs/alice_keypair.json
+    ```
+
 ## Creating a New Admin Wallet
 
 **WARNING: Following these steps will overwrite the current admin wallet. Only proceed if you intend to replace the existing admin wallet with a new one.**
@@ -344,7 +384,9 @@ If you need to create a new admin wallet, follow these steps:
 ## Notes
 
 - All operations are performed on the Solana devnet. Do not use real funds.
-- The included admin wallet (`admin_keypair.json`) is for testing purposes only.
-- The `brand_mints.json` file will be created in the project root directory to store information about created brand mints.
+- For demo purposes, the admin wallet (`admin_keypair.json`): `GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM` is already provided along with one or more user keys.
 - Make sure the admin wallet has sufficient SOL to perform operations.
-- Replace `GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM` as the admin wallet address when using these commands.
+- User keypairs are stored in the `user_keypairs` directory.
+- In a production environment, users would create their own wallets and provide their public keys.
+- The `brand_mints.json` file will be created in the project root directory to store information about created brand mints.
+- The wallet manager (`wallet-manager.ts`) is used for creating both admin and user keypairs. It can be used to set up new wallets before interacting with the Solana Points System.

@@ -1,2 +1,4 @@
 /node_modules
+/user_keypairs
+
 .env
