@@ -5,6 +5,7 @@ import {
   mintTo,
   getAccount,
   getMint,
+  burn,
 } from '@solana/spl-token';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -97,6 +98,33 @@ async function mintTokensToUser(
 
   console.log(`Minted ${amount} tokens to user: ${userAddress}`);
   return tokenAccount.address.toBase58();
+}
+
+async function burnTokens(
+  brandMintAddress: string,
+  userAddress: string,
+  amount: number
+): Promise<void> {
+  const mintPublicKey = new PublicKey(brandMintAddress);
+  const userPublicKey = new PublicKey(userAddress);
+
+  const tokenAccount = await getOrCreateAssociatedTokenAccount(
+    connection,
+    adminKeypair,
+    mintPublicKey,
+    userPublicKey
+  );
+
+  await burn(
+    connection,
+    adminKeypair,
+    tokenAccount.address,
+    mintPublicKey,
+    userPublicKey,
+    amount * 10 ** 9 // Assuming 9 decimals
+  );
+
+  console.log(`Burned ${amount} tokens from user: ${userAddress}`);
 }
 
 async function getTokenBalance(
@@ -279,6 +307,39 @@ yargs(hideBin(process.argv))
         }
       } catch (error) {
         console.error('Error getting all brand balances:', error);
+      }
+    }
+  )
+  .command(
+    'burn-tokens <brandMint> <userAddress> <amount>',
+    'Burn tokens from a user',
+    (yargs: yargs.Argv) => {
+      return yargs
+        .positional('brandMint', {
+          describe: 'Brand mint address',
+          type: 'string',
+          demandOption: true,
+        })
+        .positional('userAddress', {
+          describe: 'User wallet address',
+          type: 'string',
+          demandOption: true,
+        })
+        .positional('amount', {
+          describe: 'Amount of tokens to burn',
+          type: 'number',
+          demandOption: true,
+        });
+    },
+    async (argv: {
+      brandMint: string;
+      userAddress: string;
+      amount: number;
+    }) => {
+      try {
+        await burnTokens(argv.brandMint, argv.userAddress, argv.amount);
+      } catch (error) {
+        console.error('Error burning tokens:', error);
       }
     }
   )

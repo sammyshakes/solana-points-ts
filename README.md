@@ -85,6 +85,18 @@ Example output:
 Minted 1000 tokens to user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 ```
 
+#### Burning Tokens
+
+```bash
+npx ts-node src/solana-points.ts burn-tokens <brand-mint-address> <user-wallet-address> <amount>
+```
+
+Example output:
+
+```
+Burned 100 tokens from user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+```
+
 #### Checking Token Balance
 
 ```bash
@@ -229,17 +241,47 @@ Follow these steps to create a brand, mint tokens, and check balances:
    New Brand: 500
    ```
 
-8. **Use the hide-zero flag**
+8. **Burn some tokens**
+
+   ```bash
+   npx ts-node src/solana-points.ts burn-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM 100
+   ```
+
+   Example output:
+
+   ```
+   Burned 100 tokens from user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+   ```
+
+9. **Check balances after burning**
+
    ```bash
    npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM --hide-zero
    ```
+
    Example output:
+
    ```
    Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
-   My Test Brand: 1000
+   My Test Brand: 900
    Acme Points: 1000
    New Brand: 500
    ```
+
+10. **Use the hide-zero flag**
+
+```bash
+npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM --hide-zero
+```
+
+Example output:
+
+```
+Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
+My Test Brand: 1000
+Acme Points: 1000
+New Brand: 500
+```
 
 ## Important Notes
 
