@@ -50,6 +50,8 @@ The wallet manager script (`wallet-manager.ts`) is used for creating and managin
 
 ### Creating the Admin Wallet
 
+> Do NOT run this command if you already have an admin wallet. This will overwrite the existing admin wallet.
+
 ```bash
 npx ts-node src/wallet-manager.ts create-admin
 ```
