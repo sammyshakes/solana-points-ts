@@ -35,16 +35,16 @@ This project includes a pre-configured admin wallet for use on the Solana devnet
 
 The project is set up to use Solana's devnet. If you need to change this, modify the `SOLANA_NETWORK` variable in the `.env` file.
 
-## Documentation
+# Documentation
 
 The project consists of two main scripts:
 
 1. `wallet-manager.ts`: For managing the admin wallet
 2. `solana-points.ts`: For creating brand mints and managing tokens
 
-### Wallet Manager
+## Wallet Manager
 
-Check the admin wallet balance:
+#### Check the admin wallet balance:
 
 ```
 npx ts-node src/wallet-manager.ts check-balance
@@ -57,7 +57,7 @@ Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 Admin balance: 0.9955852 SOL
 ```
 
-### Solana Points Script
+## Solana Points Script
 
 #### Creating a new Brand Mint
 
@@ -270,28 +270,18 @@ Follow these steps to create a brand, mint tokens, and check balances:
 
 10. **Use the hide-zero flag**
 
-```bash
-npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM --hide-zero
-```
+    ```bash
+    npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM --hide-zero
+    ```
 
-Example output:
+    Example output:
 
-```
-Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
-My Test Brand: 1000
-Acme Points: 1000
-New Brand: 500
-```
-
-## Important Notes
-
-- All operations are performed on the Solana devnet. Do not use real funds.
-- The included admin wallet (`admin_keypair.json`) is for testing purposes only.
-- The `brand_mints.json` file will be created in the project root directory to store information about created brand mints.
-- Make sure the admin wallet has sufficient SOL to perform operations.
-- Replace `GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM` as the admin wallet address when using these commands.
-
----
+    ```
+    Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
+    My Test Brand: 1000
+    Acme Points: 1000
+    New Brand: 500
+    ```
 
 ## Creating a New Admin Wallet
 
@@ -345,9 +335,16 @@ If you need to create a new admin wallet, follow these steps:
    const ADMIN_KEYPAIR_FILE = 'admin_keypair.json';
    ```
 
-Remember to update any hardcoded admin addresses in your test scripts or documentation to use the new address.
+   Remember to update any hardcoded admin addresses in your test scripts or documentation to use the new address.
 
-**Important:**
+   **Important:**
 
-- Never share your `admin_keypair.json` file or upload it to public repositories. This file contains your private key and should be kept secure at all times.
-- The new admin wallet will not have any of the token balances or mints associated with the previous admin wallet. You may need to recreate your brands and mint new tokens after switching to a new admin wallet.
+   - The new admin wallet will not have any of the token balances or mints associated with the previous admin wallet. You may need to recreate your brands and mint new tokens after switching to a new admin wallet.
+
+## Notes
+
+- All operations are performed on the Solana devnet. Do not use real funds.
+- The included admin wallet (`admin_keypair.json`) is for testing purposes only.
+- The `brand_mints.json` file will be created in the project root directory to store information about created brand mints.
+- Make sure the admin wallet has sufficient SOL to perform operations.
+- Replace `GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM` as the admin wallet address when using these commands.
