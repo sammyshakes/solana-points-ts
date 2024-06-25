@@ -40,34 +40,98 @@ Check the admin wallet balance:
 npx ts-node src/wallet-manager.ts check-balance
 ```
 
-### Solana Points System
+# Using the Solana Points Script
 
-1. Create a new brand mint:
+Before you begin, ensure you have:
 
-   ```
-   npx ts-node src/solana-points.ts create-brand "Brand Name" SYMBOL
-   ```
+1. Set up the project and installed all dependencies
+2. Created and funded the admin wallet using the wallet manager script
 
-   Replace "Brand Name" with your desired brand name and SYMBOL with a short ticker symbol.
+## Creating a new Brand Mint
 
-2. Mint tokens to a user:
+To create a new brand, use the following command:
 
-   ```
-   npx ts-node src/solana-points.ts mint-tokens <brand-mint-address> <user-wallet-address> <amount>
-   ```
+```bash
+npx ts-node src/solana-points.ts create-brand "Your Brand Name" SYMBOL
+```
 
-   Replace `<brand-mint-address>` with the address output from the create-brand command, `<user-wallet-address>` with the recipient's Solana wallet address, and `<amount>` with the number of tokens to mint.
+Replace "Your Brand Name" with the desired name for your brand, and SYMBOL with a short ticker symbol (usually 3-4 letters).
 
-3. Check a user's token balance:
+Example:
 
-   ```
-   npx ts-node src/solana-points.ts get-balance <brand-mint-address> <user-wallet-address>
-   ```
+```bash
+npx ts-node src/solana-points.ts create-brand "Acme Points" ACME
+```
 
-4. Check the admin wallet balance:
-   ```
-   npx ts-node src/solana-points.ts check-balance
-   ```
+Expected output:
+
+```
+Admin balance: [current balance] SOL
+Created brand mint: [mint address]
+Admin balance: [new balance] SOL
+```
+
+The mint address displayed in the output is important. Save this address as you'll need it for minting tokens.
+
+## Minting Tokens
+
+To mint tokens to a user's wallet, use the following command:
+
+```bash
+npx ts-node src/solana-points.ts mint-tokens <brand-mint-address> <user-wallet-address> <amount>
+```
+
+- Replace `<brand-mint-address>` with the mint address from the create-brand command
+- Replace `<user-wallet-address>` with the Solana wallet address of the recipient
+- Replace `<amount>` with the number of tokens to mint
+
+Example:
+
+```bash
+npx ts-node src/solana-points.ts mint-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v Fg8qszGKKSJmFg7FowAstjM9JYXinELhY3hYzFKD5qo4 100
+```
+
+Expected output:
+
+```
+Minted 100 tokens to user: Fg8qszGKKSJmFg7FowAstjM9JYXinELhY3hYzFKD5qo4
+```
+
+## Checking Token Balance
+
+To check a user's token balance for a specific brand, use:
+
+```bash
+npx ts-node src/solana-points.ts get-balance <brand-mint-address> <user-wallet-address>
+```
+
+Example:
+
+```bash
+npx ts-node src/solana-points.ts get-balance EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v Fg8qszGKKSJmFg7FowAstjM9JYXinELhY3hYzFKD5qo4
+```
+
+Expected output:
+
+```
+Token balance: 100
+```
+
+## Checking Admin Wallet Balance
+
+To check the balance of the admin wallet:
+
+```bash
+npx ts-node src/solana-points.ts check-balance
+```
+
+Expected output:
+
+```
+Admin balance: [balance] SOL
+```
+
+Remember, all these operations are performed on the Solana devnet. Make sure the admin wallet has sufficient SOL to perform these operations. If you need more SOL, use the wallet manager script to request an airdrop.
 
 ## Important Notes
 

@@ -1,9 +1,4 @@
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  TransactionConfirmationStrategy,
-} from '@solana/web3.js';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import {
   createMint,
   getOrCreateAssociatedTokenAccount,
@@ -26,7 +21,7 @@ const ADMIN_KEYPAIR_FILE = 'admin_keypair.json';
 function loadAdminKeypair(): Keypair {
   if (!fs.existsSync(ADMIN_KEYPAIR_FILE)) {
     throw new Error(
-      `Admin keypair file not found. Please run the 'create-wallet' command first.`
+      `Admin keypair file not found. Please run the 'create-wallet' command from the wallet manager script first.`
     );
   }
   const adminPrivateKey = JSON.parse(
@@ -37,23 +32,7 @@ function loadAdminKeypair(): Keypair {
 
 const adminKeypair = loadAdminKeypair();
 
-function createAdminKeypair(): Keypair {
-  if (fs.existsSync(ADMIN_KEYPAIR_FILE)) {
-    throw new Error(
-      `Admin keypair file already exists. Use the existing wallet or delete ${ADMIN_KEYPAIR_FILE} to create a new one.`
-    );
-  }
-  const adminKeypair = Keypair.generate();
-  fs.writeFileSync(
-    ADMIN_KEYPAIR_FILE,
-    JSON.stringify(Array.from(adminKeypair.secretKey))
-  );
-  console.log(`New admin keypair generated and saved to ${ADMIN_KEYPAIR_FILE}`);
-  return adminKeypair;
-}
-
 async function checkAdminBalance(): Promise<void> {
-  const adminKeypair = loadAdminKeypair();
   const balance = await connection.getBalance(adminKeypair.publicKey);
   console.log(`Admin balance: ${balance / 10 ** 9} SOL`);
 }
