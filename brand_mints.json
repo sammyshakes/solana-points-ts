@@ -3,5 +3,15 @@
     "address": "2FSQKvr1N4tXjYhUf2ARK61WDmxWmDcgKnZUFCEs72wM",
     "name": "My Brand",
     "symbol": "MBR"
+  },
+  {
+    "address": "4uhztZYdeNWm6oWay8v6dtuyshLSAv2v3srewf27hkRd",
+    "name": "Acme Points",
+    "symbol": "ACME"
+  },
+  {
+    "address": "HWEvGwF7xc1QmaptHojNrQQbvH8wCqG5UGqqD34hpiBL",
+    "name": "Test Brand 1",
+    "symbol": "TST1"
   }
 ]

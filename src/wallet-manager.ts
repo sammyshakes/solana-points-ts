@@ -47,6 +47,7 @@ function loadAdminKeypair(): Keypair {
 async function checkAdminBalance(): Promise<void> {
   const adminKeypair = loadAdminKeypair();
   const balance = await connection.getBalance(adminKeypair.publicKey);
+  console.log(`Admin public key: ${adminKeypair.publicKey.toBase58()}`);
   console.log(`Admin balance: ${balance / 10 ** 9} SOL`);
 }
 
