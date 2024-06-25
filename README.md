@@ -182,7 +182,7 @@ Acme Points: 1000
 
 ## Step-by-Step Walkthrough
 
-Follow these steps to create a brand, mint tokens, and check balances:
+This walkthrough demonstrates creating a user, minting tokens to that user, and performing operations on the user's tokens, which provides a realistic scenario for using the Tronic Solana Points System.
 
 1. **Check the admin wallet balance**
 
@@ -211,117 +211,87 @@ Follow these steps to create a brand, mint tokens, and check balances:
    Admin balance: 0.9941136 SOL
    ```
 
-3. **Mint tokens to the admin wallet**
+3. **Create a user keypair**
 
    ```bash
-   npx ts-node src/solana-points.ts mint-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM 1000
+   npx ts-node src/wallet-manager.ts create-user alice
    ```
 
    Example output:
 
    ```
-   Minted 1000 tokens to user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+   Created user keypair for alice
+   Public key: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
+   Keypair saved to: /path/to/project/user_keypairs/alice_keypair.json
    ```
 
-4. **Check the token balance**
+4. **Mint tokens to the new user**
 
    ```bash
-   npx ts-node src/solana-points.ts check-token-balance EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+   npx ts-node src/solana-points.ts mint-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB 1000
    ```
 
    Example output:
 
    ```
-   Token balance for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
+   Minted 1000 tokens to user: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
+   ```
+
+5. **Check the token balance for the user**
+
+   ```bash
+   npx ts-node src/solana-points.ts check-token-balance EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
+   ```
+
+   Example output:
+
+   ```
+   Token balance for 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB:
    1000 tokens of mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
    ```
 
-5. **Get all brand balances**
+6. **Create another brand and mint tokens to the user**
+   Repeat steps 2 and 4 with a different brand name and symbol.
+
+7. **Check all balances for the user**
 
    ```bash
-   npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+   npx ts-node src/solana-points.ts get-all-balances 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
    ```
 
    Example output:
 
    ```
-   Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
+   Token balances for 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB:
    My Test Brand: 1000
-   Acme Points: 1000
-   Test Brand 1: 0
-   ```
-
-6. **Create another brand and mint tokens**
-   Repeat steps 2 and 3 with a different brand name and symbol.
-
-7. **Check all balances again**
-
-   ```bash
-   npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
-   ```
-
-   Example output:
-
-   ```
-   Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
-   My Test Brand: 1000
-   Acme Points: 1000
-   Test Brand 1: 0
    New Brand: 500
    ```
 
-8. **Burn some tokens**
+8. **Burn some tokens from the user**
 
    ```bash
-   npx ts-node src/solana-points.ts burn-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM 100
+   npx ts-node src/solana-points.ts burn-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB 100
    ```
 
    Example output:
 
    ```
-   Burned 100 tokens from user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+   Burned 100 tokens from user: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
    ```
 
 9. **Check balances after burning**
 
    ```bash
-   npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM --hide-zero
+   npx ts-node src/solana-points.ts get-all-balances 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB --hide-zero
    ```
 
    Example output:
 
    ```
-   Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
+   Token balances for 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB:
    My Test Brand: 900
-   Acme Points: 1000
    New Brand: 500
    ```
-
-10. **Use the hide-zero flag**
-
-    ```bash
-    npx ts-node src/solana-points.ts get-all-balances GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM --hide-zero
-    ```
-
-    Example output:
-
-    ```
-    Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
-    My Test Brand: 1000
-    Acme Points: 1000
-    New Brand: 500
-    ```
-
-11. **Create a user keypair**
-    ```bash
-    npx ts-node src/wallet-manager.ts create-user alice
-    ```
-    Example output:
-    ```
-    Created user keypair for alice
-    Public key: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
-    Keypair saved to: /path/to/project/user_keypairs/alice_keypair.json
-    ```
 
 ## Creating a New Admin Wallet
 
