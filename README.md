@@ -75,12 +75,6 @@ npx ts-node src/wallet-manager.ts create-user <username>
 npx ts-node src/solana-points.ts create-brand "Your Brand Name" SYMBOL
 ```
 
-To create a Token-2022 brand, add the `--token2022` flag:
-
-```bash
-npx ts-node src/solana-points.ts create-brand "Your Brand Name" SYMBOL --token2022
-```
-
 ### Minting Tokens
 
 ```bash
