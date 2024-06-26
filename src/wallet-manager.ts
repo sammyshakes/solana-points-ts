@@ -100,7 +100,7 @@ function createUserKeypair(username: string): void {
 }
 
 yargs(hideBin(process.argv))
-  .command('create-wallet', 'Create a new admin wallet', {}, async () => {
+  .command('create-admin', 'Create a new admin wallet', {}, async () => {
     try {
       const adminKeypair = createAdminKeypair();
       console.log(`Admin public key: ${adminKeypair.publicKey.toBase58()}`);
