@@ -13,5 +13,22 @@
     "address": "HWEvGwF7xc1QmaptHojNrQQbvH8wCqG5UGqqD34hpiBL",
     "name": "Test Brand 1",
     "symbol": "TST1"
+  },
+  {
+    "address": "2BEzd5YamMkeaCZNvBFWjQt4gdSU7bbyNJ349JX3Xk6L",
+    "name": "Test Brand 1",
+    "symbol": "TST1"
+  },
+  {
+    "address": "Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6",
+    "name": "Test Brand 2",
+    "symbol": "TST2",
+    "tokenProgramId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+  },
+  {
+    "address": "8TZFG71kwAMPfC9gbF5Cx5J9XhcTTeB9eomhN772CCFW",
+    "name": "Test Brand 3",
+    "symbol": "TST3",
+    "tokenProgramId": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
   }
 ]

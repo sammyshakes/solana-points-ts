@@ -1,12 +1,24 @@
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import {
-  createMint,
-  getOrCreateAssociatedTokenAccount,
-  mintTo,
-  getAccount,
-  getMint,
-  burn,
-} from '@solana/spl-token';
+  createV1,
+  mintV1,
+  burnV1,
+  TokenStandard,
+  mplTokenMetadata,
+  fetchDigitalAsset,
+  DigitalAsset,
+  fetchAllDigitalAssetByOwner,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
+  generateSigner,
+  percentAmount,
+  publicKey as umiPublicKey,
+  some,
+  Umi,
+} from '@metaplex-foundation/umi';
+import { keypairIdentity } from '@metaplex-foundation/umi';
+import { fromWeb3JsKeypair } from '@metaplex-foundation/umi-web3js-adapters';
+import * as web3 from '@solana/web3.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import * as dotenv from 'dotenv';
@@ -16,11 +28,22 @@ dotenv.config();
 
 const SOLANA_NETWORK =
   process.env.SOLANA_NETWORK || 'https://api.devnet.solana.com';
-const connection = new Connection(SOLANA_NETWORK, 'confirmed');
+
+interface MintInfo {
+  address: string;
+  name: string;
+  symbol: string;
+  tokenProgramId: string; // Store the token program ID instead of a boolean
+}
+
+const SPL_TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const TOKEN_2022_PROGRAM_ID = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+
+const umi = createUmi(SOLANA_NETWORK).use(mplTokenMetadata());
 
 const ADMIN_KEYPAIR_FILE = 'admin_keypair.json';
 
-function loadAdminKeypair(): Keypair {
+function loadAdminKeypair(): web3.Keypair {
   if (!fs.existsSync(ADMIN_KEYPAIR_FILE)) {
     throw new Error(
       `Admin keypair file not found. Please run the 'create-wallet' command from the wallet manager script first.`
@@ -29,38 +52,51 @@ function loadAdminKeypair(): Keypair {
   const adminPrivateKey = JSON.parse(
     fs.readFileSync(ADMIN_KEYPAIR_FILE, 'utf-8')
   );
-  return Keypair.fromSecretKey(Uint8Array.from(adminPrivateKey));
+  return web3.Keypair.fromSecretKey(Uint8Array.from(adminPrivateKey));
 }
 
 const adminKeypair = loadAdminKeypair();
+const umiKeypair = fromWeb3JsKeypair(adminKeypair);
+umi.use(keypairIdentity(umiKeypair));
 
 async function checkAdminBalance(): Promise<void> {
+  const connection = new web3.Connection(SOLANA_NETWORK, 'confirmed');
   const balance = await connection.getBalance(adminKeypair.publicKey);
   console.log(`Admin public key: ${adminKeypair.publicKey.toBase58()}`);
   console.log(`Admin balance: ${balance / 10 ** 9} SOL`);
 }
 
-interface MintInfo {
-  address: string;
-  name: string;
-  symbol: string;
-}
+async function createBrandMint(
+  umi: Umi,
+  name: string,
+  symbol: string,
+  useToken2022: boolean = false
+): Promise<string> {
+  const mint = generateSigner(umi);
+  const tokenProgramId = useToken2022
+    ? TOKEN_2022_PROGRAM_ID
+    : SPL_TOKEN_PROGRAM_ID;
 
-async function createBrandMint(name: string, symbol: string): Promise<string> {
-  const mint = await createMint(
-    connection,
-    adminKeypair,
-    adminKeypair.publicKey,
-    null,
-    9
-  );
-
-  const mintInfo: MintInfo = {
-    address: mint.toBase58(),
+  await createV1(umi, {
+    mint,
+    authority: umi.identity,
     name,
     symbol,
+    uri: '', // You can add a URI to more token info if needed
+    sellerFeeBasisPoints: percentAmount(0),
+    decimals: some(9), // 9 decimals, you can adjust this as needed
+    tokenStandard: TokenStandard.Fungible,
+    splTokenProgram: umiPublicKey(tokenProgramId),
+  }).sendAndConfirm(umi);
+
+  const mintInfo: MintInfo = {
+    address: mint.publicKey,
+    name,
+    symbol,
+    tokenProgramId,
   };
 
+  // Save mint info to file...
   const mintsFile = 'brand_mints.json';
   let mints: MintInfo[] = [];
   if (fs.existsSync(mintsFile)) {
@@ -69,90 +105,79 @@ async function createBrandMint(name: string, symbol: string): Promise<string> {
   mints.push(mintInfo);
   fs.writeFileSync(mintsFile, JSON.stringify(mints, null, 2));
 
-  return mint.toBase58();
+  return mint.publicKey;
 }
 
 async function mintTokensToUser(
-  brandMintAddress: string,
-  userAddress: string,
-  amount: number
-): Promise<string> {
-  const mintPublicKey = new PublicKey(brandMintAddress);
-  const userPublicKey = new PublicKey(userAddress);
-
-  const tokenAccount = await getOrCreateAssociatedTokenAccount(
-    connection,
-    adminKeypair,
-    mintPublicKey,
-    userPublicKey
-  );
-
-  await mintTo(
-    connection,
-    adminKeypair,
-    mintPublicKey,
-    tokenAccount.address,
-    adminKeypair.publicKey,
-    amount * 10 ** 9 // Assuming 9 decimals
-  );
-
-  console.log(`Minted ${amount} tokens to user: ${userAddress}`);
-  return tokenAccount.address.toBase58();
-}
-
-async function burnTokens(
+  umi: Umi,
   brandMintAddress: string,
   userAddress: string,
   amount: number
 ): Promise<void> {
-  const mintPublicKey = new PublicKey(brandMintAddress);
-  const userPublicKey = new PublicKey(userAddress);
+  await mintV1(umi, {
+    mint: umiPublicKey(brandMintAddress),
+    authority: umi.identity,
+    amount: BigInt(amount * 10 ** 9), // Assuming 9 decimals
+    tokenOwner: umiPublicKey(userAddress),
+    tokenStandard: TokenStandard.Fungible,
+  }).sendAndConfirm(umi);
 
-  const tokenAccount = await getOrCreateAssociatedTokenAccount(
-    connection,
-    adminKeypair,
-    mintPublicKey,
-    userPublicKey
-  );
-
-  await burn(
-    connection,
-    adminKeypair,
-    tokenAccount.address,
-    mintPublicKey,
-    userPublicKey,
-    amount * 10 ** 9 // Assuming 9 decimals
-  );
-
-  console.log(`Burned ${amount} tokens from user: ${userAddress}`);
+  console.log(`Minted ${amount} tokens to user: ${userAddress}`);
 }
 
-async function getTokenBalance(
+async function burnTokens(
+  umi: Umi,
+  mintAddress: string,
+  ownerAddress: string,
+  amount: number
+): Promise<void> {
+  await burnV1(umi, {
+    mint: umiPublicKey(mintAddress),
+    authority: umi.identity,
+    tokenOwner: umiPublicKey(ownerAddress),
+    amount: BigInt(amount * 10 ** 9), // Assuming 9 decimals
+    tokenStandard: TokenStandard.Fungible,
+  }).sendAndConfirm(umi);
+
+  console.log(`Burned ${amount} tokens from user: ${ownerAddress}`);
+}
+
+async function getTokenMetadata(
+  umi: Umi,
+  mintAddress: string
+): Promise<DigitalAsset | null> {
+  try {
+    return await fetchDigitalAsset(umi, umiPublicKey(mintAddress));
+  } catch (error) {
+    console.error('Error fetching digital asset:', error);
+    return null;
+  }
+}
+
+async function checkTokenBalance(
+  umi: Umi,
   tokenMintAddress: string,
   walletAddress: string
 ): Promise<number> {
-  const mintPublicKey = new PublicKey(tokenMintAddress);
-  const walletPublicKey = new PublicKey(walletAddress);
-
   try {
-    const tokenAccount = await getOrCreateAssociatedTokenAccount(
-      connection,
-      adminKeypair,
-      mintPublicKey,
-      walletPublicKey
+    const assets = await fetchAllDigitalAssetByOwner(
+      umi,
+      umiPublicKey(walletAddress)
     );
+    const asset = assets.find((a) => a.mint.publicKey === tokenMintAddress);
 
-    const accountInfo = await getAccount(connection, tokenAccount.address);
-    const mintInfo = await getMint(connection, mintPublicKey);
-
-    return Number(accountInfo.amount) / 10 ** mintInfo.decimals;
+    if (asset) {
+      return Number(asset.mint.supply) / Math.pow(10, asset.mint.decimals);
+    }
+    return 0; // Return 0 if the wallet doesn't own any tokens of this mint
   } catch (error) {
     console.error('Error getting token balance:', error);
-    return 0; // Return 0 if there's an error (e.g., account doesn't exist)
+    return 0; // Return 0 if there's an error
   }
 }
 
 async function getAllBrandBalances(
+  umi: Umi,
   walletAddress: string,
   hideZeroBalances: boolean = false
 ): Promise<{ [key: string]: number }> {
@@ -164,11 +189,26 @@ async function getAllBrandBalances(
   const mints: MintInfo[] = JSON.parse(fs.readFileSync(mintsFile, 'utf-8'));
   const balances: { [key: string]: number } = {};
 
-  for (const mint of mints) {
-    const balance = await getTokenBalance(mint.address, walletAddress);
-    if (!hideZeroBalances || balance > 0) {
-      balances[mint.name] = balance;
+  try {
+    const assets = await fetchAllDigitalAssetByOwner(
+      umi,
+      umiPublicKey(walletAddress)
+    );
+
+    for (const mint of mints) {
+      const asset = assets.find((a) => a.mint.publicKey === mint.address);
+      if (asset) {
+        const balance =
+          Number(asset.mint.supply) / Math.pow(10, asset.mint.decimals);
+        if (!hideZeroBalances || balance > 0) {
+          balances[mint.name] = balance;
+        }
+      } else if (!hideZeroBalances) {
+        balances[mint.name] = 0;
+      }
     }
+  } catch (error) {
+    console.error('Error fetching digital assets:', error);
   }
 
   return balances;
@@ -189,13 +229,28 @@ yargs(hideBin(process.argv))
           describe: 'Brand symbol',
           type: 'string',
           demandOption: true,
+        })
+        .option('token2022', {
+          describe: 'Use Token-2022 program',
+          type: 'boolean',
+          default: false,
         });
     },
-    async (argv: { name: string; symbol: string }) => {
+    async (argv: { name: string; symbol: string; token2022: boolean }) => {
       try {
         await checkAdminBalance();
-        const mintAddress = await createBrandMint(argv.name, argv.symbol);
+        const mintAddress = await createBrandMint(
+          umi,
+          argv.name,
+          argv.symbol,
+          argv.token2022
+        );
         console.log(`Created brand mint: ${mintAddress}`);
+        console.log(
+          `Using ${
+            argv.token2022 ? 'Token-2022' : 'standard SPL Token'
+          } program`
+        );
         await checkAdminBalance();
       } catch (error) {
         console.error('Error creating brand mint:', error);
@@ -229,19 +284,117 @@ yargs(hideBin(process.argv))
       amount: number;
     }) => {
       try {
-        await mintTokensToUser(argv.brandMint, argv.userAddress, argv.amount);
+        await mintTokensToUser(
+          umi,
+          argv.brandMint,
+          argv.userAddress,
+          argv.amount
+        );
       } catch (error) {
         console.error('Error minting tokens:', error);
       }
     }
   )
   .command(
-    'check-token-balance <tokenMint> <walletAddress>',
-    'Check token balance for any SPL token and wallet address',
+    'check-balance',
+    'Check the balance of the admin wallet',
+    {},
+    async () => {
+      try {
+        await checkAdminBalance();
+      } catch (error) {
+        console.error('Error checking balance:', error);
+      }
+    }
+  )
+  .command(
+    'get-metadata <mintAddress>',
+    'Get comprehensive metadata for a token',
+    (yargs: yargs.Argv) => {
+      return yargs.positional('mintAddress', {
+        describe: 'Mint address of the token',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    async (argv: { mintAddress: string }) => {
+      try {
+        const asset = await getTokenMetadata(umi, argv.mintAddress);
+        if (asset) {
+          console.log('Digital Asset Information:');
+          console.log('Mint:', asset.mint.publicKey);
+          console.log('Metadata:');
+          console.log('  Name:', asset.metadata.name);
+          console.log('  Symbol:', asset.metadata.symbol);
+          console.log('  URI:', asset.metadata.uri);
+          console.log(
+            '  Seller Fee Basis Points:',
+            asset.metadata.sellerFeeBasisPoints
+          );
+          console.log('  Creators:', asset.metadata.creators);
+          if (asset.edition) {
+            console.log('Edition:');
+            console.log('  Is Original:', asset.edition.isOriginal);
+            if (asset.edition.isOriginal) {
+              console.log('  Max Supply:', asset.edition.maxSupply);
+              console.log('  Supply:', asset.edition.supply);
+            } else {
+              // For non-original editions, we need to check the structure
+              if ('edition' in asset.edition) {
+                console.log('  Edition Number:', asset.edition.edition);
+              } else {
+                console.log('  Edition information not available');
+              }
+            }
+          }
+        } else {
+          console.log('No metadata found for the given mint address.');
+        }
+      } catch (error) {
+        console.error('Error fetching digital asset:', error);
+      }
+    }
+  )
+  .command(
+    'burn-tokens <mintAddress> <ownerAddress> <amount>',
+    'Burn tokens from a user',
     (yargs: yargs.Argv) => {
       return yargs
-        .positional('tokenMint', {
-          describe: 'Token mint address',
+        .positional('mintAddress', {
+          describe: 'Mint address of the token',
+          type: 'string',
+          demandOption: true,
+        })
+        .positional('ownerAddress', {
+          describe: 'Address of the token owner',
+          type: 'string',
+          demandOption: true,
+        })
+        .positional('amount', {
+          describe: 'Amount of tokens to burn',
+          type: 'number',
+          demandOption: true,
+        });
+    },
+    async (argv: {
+      mintAddress: string;
+      ownerAddress: string;
+      amount: number;
+    }) => {
+      try {
+        await burnTokens(umi, argv.mintAddress, argv.ownerAddress, argv.amount);
+      } catch (error) {
+        console.error('Error burning tokens:', error);
+      }
+    }
+  )
+  .command(
+    'check-token-balance <mintAddress> <walletAddress>',
+    'Check token balance for a wallet',
+    (yargs: yargs.Argv) => {
+      return yargs
+        .positional('mintAddress', {
+          describe: 'Mint address of the token',
           type: 'string',
           demandOption: true,
         })
@@ -251,27 +404,16 @@ yargs(hideBin(process.argv))
           demandOption: true,
         });
     },
-    async (argv: { tokenMint: string; walletAddress: string }) => {
+    async (argv: { mintAddress: string; walletAddress: string }) => {
       try {
-        const balance = await getTokenBalance(
-          argv.tokenMint,
+        const balance = await checkTokenBalance(
+          umi,
+          argv.mintAddress,
           argv.walletAddress
         );
-        console.log(`Token balance for ${argv.walletAddress}:`);
-        console.log(`${balance} tokens of mint ${argv.tokenMint}`);
+        console.log(`Token balance for ${argv.walletAddress}: ${balance}`);
       } catch (error) {
         console.error('Error checking token balance:', error);
-      }
-    }
-  )
-  .command(
-    'check-balance',
-    'Check the balance of the admin wallet',
-    async () => {
-      try {
-        await checkAdminBalance();
-      } catch (error) {
-        console.error('Error checking balance:', error);
       }
     }
   )
@@ -294,6 +436,7 @@ yargs(hideBin(process.argv))
     async (argv: { walletAddress: string; hideZero: boolean }) => {
       try {
         const balances = await getAllBrandBalances(
+          umi,
           argv.walletAddress,
           argv.hideZero
         );
@@ -307,39 +450,6 @@ yargs(hideBin(process.argv))
         }
       } catch (error) {
         console.error('Error getting all brand balances:', error);
-      }
-    }
-  )
-  .command(
-    'burn-tokens <brandMint> <userAddress> <amount>',
-    'Burn tokens from a user',
-    (yargs: yargs.Argv) => {
-      return yargs
-        .positional('brandMint', {
-          describe: 'Brand mint address',
-          type: 'string',
-          demandOption: true,
-        })
-        .positional('userAddress', {
-          describe: 'User wallet address',
-          type: 'string',
-          demandOption: true,
-        })
-        .positional('amount', {
-          describe: 'Amount of tokens to burn',
-          type: 'number',
-          demandOption: true,
-        });
-    },
-    async (argv: {
-      brandMint: string;
-      userAddress: string;
-      amount: number;
-    }) => {
-      try {
-        await burnTokens(argv.brandMint, argv.userAddress, argv.amount);
-      } catch (error) {
-        console.error('Error burning tokens:', error);
       }
     }
   )
