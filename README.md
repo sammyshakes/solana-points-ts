@@ -239,7 +239,7 @@ Test Brand 2: 1000
 
    Ensure you have enough SOL in the admin wallet. If not, you may need to airdrop some SOL using a Solana faucet.
 
-2. **Create a new brand**
+2. **Create a new brand (Standard SPL Token)**
 
    Now, let's create a new brand for our tokens. Enter a name and symbol for your brand. For example, to create a brand named "My Test Brand" with the symbol "MTB", run the following command:
 
@@ -252,6 +252,19 @@ Test Brand 2: 1000
    ```
    Created brand mint: Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
    Using standard SPL Token program
+   ```
+
+   **If you want to create a brand using the Token-2022 program instead, use the `--token2022` flag:**
+
+   ```bash
+   npx ts-node src/solana-points.ts create-brand "My Token-2022 Brand" MT22 --token2022
+   ```
+
+   Example output:
+
+   ```
+   Created brand mint: Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
+   Using Token-2022 program
    ```
 
    This command will output a mint address. The address is automatically saved in the `brand_mints.json` file in your project directory. For this walkthrough, also note down this address (in this example, `Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6`) as we'll use it in subsequent steps.
