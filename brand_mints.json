@@ -30,5 +30,17 @@
     "name": "Test Brand 3",
     "symbol": "TST3",
     "tokenProgramId": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+  },
+  {
+    "address": "6oRNsVBw1fC2FeWRDCjEgjWT39Uzk5g7tMnQBeSKRgFW",
+    "name": "Test Brand 4",
+    "symbol": "TST4",
+    "tokenProgramId": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+  },
+  {
+    "address": "7LTqUdKCBbNbNA2tvGQRmyeEnWMUSREwhMExc4fcyWck",
+    "name": "My Test Brand 5",
+    "symbol": "MTB5",
+    "tokenProgramId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
   }
 ]

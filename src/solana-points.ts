@@ -28,18 +28,20 @@ dotenv.config();
 
 const SOLANA_NETWORK =
   process.env.SOLANA_NETWORK || 'https://api.devnet.solana.com';
-const TOKEN_2022_PROGRAM_ID = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
-
-const umi = createUmi(SOLANA_NETWORK).use(mplTokenMetadata());
-
-const ADMIN_KEYPAIR_FILE = 'admin_keypair.json';
 
 interface MintInfo {
   address: string;
   name: string;
   symbol: string;
-  tokenProgramId: string;
+  tokenProgramId: string; // Store the token program ID instead of a boolean
 }
+
+const SPL_TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const TOKEN_2022_PROGRAM_ID = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+
+const umi = createUmi(SOLANA_NETWORK).use(mplTokenMetadata());
+
+const ADMIN_KEYPAIR_FILE = 'admin_keypair.json';
 
 function loadAdminKeypair(): web3.Keypair {
   if (!fs.existsSync(ADMIN_KEYPAIR_FILE)) {
@@ -67,9 +69,13 @@ async function checkAdminBalance(): Promise<void> {
 async function createBrandMint(
   umi: Umi,
   name: string,
-  symbol: string
+  symbol: string,
+  useToken2022: boolean = false
 ): Promise<string> {
   const mint = generateSigner(umi);
+  const tokenProgramId = useToken2022
+    ? TOKEN_2022_PROGRAM_ID
+    : SPL_TOKEN_PROGRAM_ID;
 
   await createV1(umi, {
     mint,
@@ -80,14 +86,14 @@ async function createBrandMint(
     sellerFeeBasisPoints: percentAmount(0),
     decimals: some(9), // 9 decimals, you can adjust this as needed
     tokenStandard: TokenStandard.Fungible,
-    splTokenProgram: umiPublicKey(TOKEN_2022_PROGRAM_ID),
+    splTokenProgram: umiPublicKey(tokenProgramId),
   }).sendAndConfirm(umi);
 
   const mintInfo: MintInfo = {
     address: mint.publicKey,
     name,
     symbol,
-    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+    tokenProgramId,
   };
 
   // Save mint info to file...
@@ -223,14 +229,28 @@ yargs(hideBin(process.argv))
           describe: 'Brand symbol',
           type: 'string',
           demandOption: true,
+        })
+        .option('token2022', {
+          describe: 'Use Token-2022 program',
+          type: 'boolean',
+          default: false,
         });
     },
-    async (argv: { name: string; symbol: string }) => {
+    async (argv: { name: string; symbol: string; token2022: boolean }) => {
       try {
         await checkAdminBalance();
-        const mintAddress = await createBrandMint(umi, argv.name, argv.symbol);
+        const mintAddress = await createBrandMint(
+          umi,
+          argv.name,
+          argv.symbol,
+          argv.token2022
+        );
         console.log(`Created brand mint: ${mintAddress}`);
-        console.log('Using Token-2022 program');
+        console.log(
+          `Using ${
+            argv.token2022 ? 'Token-2022' : 'standard SPL Token'
+          } program`
+        );
         await checkAdminBalance();
       } catch (error) {
         console.error('Error creating brand mint:', error);
