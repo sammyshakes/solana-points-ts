@@ -23,8 +23,7 @@ This project implements a simple points system on the Solana blockchain, allowin
 
 2. Install dependencies:
    ```
-   npm install --save-dev typescript ts-node @types/node
-   npm install @solana/web3.js @solana/spl-token yargs dotenv
+   npm install
    ```
 
 ## Configuration
@@ -63,8 +62,6 @@ New admin keypair generated and saved to admin_keypair.json
 Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 ```
 
----
-
 ### Checking Admin Wallet Balance
 
 ```bash
@@ -75,10 +72,8 @@ Example output:
 
 ```
 Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
-Admin balance: 0.9955852 SOL
+Admin balance: 1.95526572 SOL
 ```
-
----
 
 ### Creating a User Keypair
 
@@ -105,12 +100,19 @@ npx ts-node src/solana-points.ts create-brand "Your Brand Name" SYMBOL
 Example output:
 
 ```
-Admin balance: 0.9955852 SOL
-Created brand mint: 4uhztZYdeNWm6oWay8v6dtuyshLSAv2v3srewf27hkRd
-Admin balance: 0.9941136 SOL
+Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+Admin balance: 1.97235404 SOL
+Created brand mint: Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
+Using standard SPL Token program
+Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
+Admin balance: 1.95526572 SOL
 ```
 
----
+To create a Token-2022 brand, add the `--token2022` flag:
+
+```bash
+npx ts-node src/solana-points.ts create-brand "Your Brand Name" SYMBOL --token2022
+```
 
 ### Minting Tokens
 
@@ -124,8 +126,6 @@ Example output:
 Minted 1000 tokens to user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 ```
 
----
-
 ### Burning Tokens
 
 ```bash
@@ -138,8 +138,6 @@ Example output:
 Burned 100 tokens from user: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
 ```
 
----
-
 ### Checking Token Balance
 
 ```bash
@@ -149,11 +147,8 @@ npx ts-node src/solana-points.ts check-token-balance <brand-mint-address> <user-
 Example output:
 
 ```
-Token balance for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
-1000 tokens of mint 4uhztZYdeNWm6oWay8v6dtuyshLSAv2v3srewf27hkRd
+Token balance for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM: 1000
 ```
-
----
 
 ### Checking Admin Wallet Balance
 
@@ -165,10 +160,36 @@ Example output:
 
 ```
 Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
-Admin balance: 0.9941136 SOL
+Admin balance: 1.95526572 SOL
 ```
 
----
+### Getting Token Metadata
+
+```bash
+npx ts-node src/solana-points.ts get-metadata <mint-address>
+```
+
+Example output:
+
+```
+Digital Asset Information:
+Mint: Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
+Metadata:
+  Name: Test Brand 2
+  Symbol: TST2
+  URI:
+  Seller Fee Basis Points: 0
+  Creators: {
+  __option: 'Some',
+  value: [
+    {
+      address: 'GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM',
+      verified: true,
+      share: 100
+    }
+  ]
+}
+```
 
 ### Getting All Brand Balances for a Wallet
 
@@ -181,8 +202,9 @@ Example output:
 ```
 Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
 My Brand: 0
-Acme Points: 1000
+Acme Points: 0
 Test Brand 1: 0
+Test Brand 2: 1000
 ```
 
 To hide zero balances, add the `--hide-zero` flag:
@@ -195,14 +217,14 @@ Example output:
 
 ```
 Token balances for GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM:
-Acme Points: 1000
+Test Brand 2: 1000
 ```
 
 ## Step-by-Step Walkthrough
 
-This walkthrough demonstrates creating a user, minting tokens to that user, and performing operations on the user's tokens, which provides a realistic scenario for using the Tronic Solana Points System.
-
 1. **Check the admin wallet balance**
+
+   First, let's make sure the admin wallet has enough SOL to perform operations:
 
    ```bash
    npx ts-node src/solana-points.ts check-balance
@@ -212,10 +234,14 @@ This walkthrough demonstrates creating a user, minting tokens to that user, and 
 
    ```
    Admin public key: GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM
-   Admin balance: 0.9955852 SOL
+   Admin balance: 1.95526572 SOL
    ```
 
-2. **Create a new brand**
+   Ensure you have enough SOL in the admin wallet. If not, you may need to airdrop some SOL using a Solana faucet.
+
+2. **Create a new brand (Standard SPL Token)**
+
+   Now, let's create a new brand for our tokens. Enter a name and symbol for your brand. For example, to create a brand named "My Test Brand" with the symbol "MTB", run the following command:
 
    ```bash
    npx ts-node src/solana-points.ts create-brand "My Test Brand" MTB
@@ -224,12 +250,28 @@ This walkthrough demonstrates creating a user, minting tokens to that user, and 
    Example output:
 
    ```
-   Admin balance: 0.9955852 SOL
-   Created brand mint: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
-   Admin balance: 0.9941136 SOL
+   Created brand mint: Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
+   Using standard SPL Token program
    ```
 
+   **If you want to create a brand using the Token-2022 program instead, use the `--token2022` flag:**
+
+   ```bash
+   npx ts-node src/solana-points.ts create-brand "My Token-2022 Brand" MT22 --token2022
+   ```
+
+   Example output:
+
+   ```
+   Created brand mint: Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
+   Using Token-2022 program
+   ```
+
+   This command will output a mint address. The address is automatically saved in the `brand_mints.json` file in your project directory. For this walkthrough, also note down this address (in this example, `Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6`) as we'll use it in subsequent steps.
+
 3. **Create a user keypair**
+
+   Let's create a new user to interact with our tokens:
 
    ```bash
    npx ts-node src/wallet-manager.ts create-user alice
@@ -243,10 +285,14 @@ This walkthrough demonstrates creating a user, minting tokens to that user, and 
    Keypair saved to: /path/to/project/user_keypairs/alice_keypair.json
    ```
 
+   This will generate a new keypair for Alice and display her public key. The keypair is automatically saved in the `user_keypairs` directory. Note down Alice's public key for the next steps.
+
 4. **Mint tokens to the new user**
 
+   Now, let's mint some tokens to Alice using the brand mint address from step 2 and Alice's public key from step 3:
+
    ```bash
-   npx ts-node src/solana-points.ts mint-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB 1000
+   npx ts-node src/solana-points.ts mint-tokens Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB 1000
    ```
 
    Example output:
@@ -257,21 +303,65 @@ This walkthrough demonstrates creating a user, minting tokens to that user, and 
 
 5. **Check the token balance for the user**
 
+   Let's verify that Alice received the tokens:
+
    ```bash
-   npx ts-node src/solana-points.ts check-token-balance EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
+   npx ts-node src/solana-points.ts check-token-balance Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
    ```
 
    Example output:
 
    ```
-   Token balance for 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB:
-   1000 tokens of mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+   Token balance for 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB: 1000
    ```
 
-6. **Create another brand and mint tokens to the user**
-   Repeat steps 2 and 4 with a different brand name and symbol.
+6. **Burn some tokens from the user**
 
-7. **Check all balances for the user**
+   Now, let's burn 100 tokens from Alice's balance:
+
+   ```bash
+   npx ts-node src/solana-points.ts burn-tokens Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB 100
+   ```
+
+   Example output:
+
+   ```
+   Burned 100 tokens from user: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
+   ```
+
+7. **Get token metadata**
+
+   Let's retrieve the metadata for our token:
+
+   ```bash
+   npx ts-node src/solana-points.ts get-metadata Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
+   ```
+
+   Example output:
+
+   ```
+   Digital Asset Information:
+   Mint: Gb9Hb4eJTAsNW6Y3E7TFzzmNa9p8uxeJCvbgpFtQPgj6
+   Metadata:
+     Name: My Test Brand
+     Symbol: MTB
+     URI:
+     Seller Fee Basis Points: 0
+     Creators: {
+       __option: 'Some',
+       value: [
+         {
+           address: 'GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM',
+           verified: true,
+           share: 100
+         }
+       ]
+     }
+   ```
+
+8. **Check all balances for the user**
+
+   Finally, let's check all token balances for Alice:
 
    ```bash
    npx ts-node src/solana-points.ts get-all-balances 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
@@ -281,98 +371,21 @@ This walkthrough demonstrates creating a user, minting tokens to that user, and 
 
    ```
    Token balances for 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB:
-   My Test Brand: 1000
-   New Brand: 500
+   My Test Brand: 900
    ```
 
-8. **Burn some tokens from the user**
-
-   ```bash
-   npx ts-node src/solana-points.ts burn-tokens EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB 100
-   ```
-
-   Example output:
-
-   ```
-   Burned 100 tokens from user: 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB
-   ```
-
-9. **Check balances after burning**
+   To see only non-zero balances (which in this case would be the same output), add the `--hide-zero` flag:
 
    ```bash
    npx ts-node src/solana-points.ts get-all-balances 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB --hide-zero
    ```
 
-   Example output:
-
-   ```
-   Token balances for 7JvBvJ5kzTw8bzMj2FdJAijLWXcyeVBW5f1f3Bs5KThB:
-   My Test Brand: 900
-   New Brand: 500
-   ```
-
-## Creating a New Admin Wallet
-
-**WARNING: Following these steps will overwrite the current admin wallet. Only proceed if you intend to replace the existing admin wallet with a new one.**
-
-If you need to create a new admin wallet, follow these steps:
-
-1. **Generate a new Solana keypair**
-
-   Run the following command in your terminal:
-
-   ```bash
-   solana-keygen new --outfile admin_keypair.json
-   ```
-
-   This will create a new keypair and save it to `admin_keypair.json`, overwriting any existing file with the same name.
-
-2. **Secure your keypair**
-
-   Ensure that `admin_keypair.json` is added to your `.gitignore` file to prevent accidentally committing it to version control.
-
-3. **Get your new public key**
-
-   Retrieve the public key of your new wallet:
-
-   ```bash
-   solana-keygen pubkey admin_keypair.json
-   ```
-
-   Make a note of this public key as you'll need it for the next step.
-
-4. **Fund your new wallet**
-
-   Use an available Solana devnet faucet to fund your new wallet. You can find faucets by searching online for "Solana devnet faucet". Input your new public key on the faucet website to receive SOL.
-
-5. **Verify the new wallet**
-
-   Run the check balance command to ensure everything is set up correctly:
-
-   ```bash
-   npx ts-node src/solana-points.ts check-balance
-   ```
-
-   You should see output with your new public key and balance.
-
-6. **Update your project**
-
-   If you've changed the name or location of the keypair file, update the `ADMIN_KEYPAIR_FILE` constant in both `wallet-manager.ts` and `solana-points.ts`:
-
-   ```typescript
-   const ADMIN_KEYPAIR_FILE = 'admin_keypair.json';
-   ```
-
-   Remember to update any hardcoded admin addresses in your test scripts or documentation to use the new address.
-
-   **Important:**
-
-   - The new admin wallet will not have any of the token balances or mints associated with the previous admin wallet. You may need to recreate your brands and mint new tokens after switching to a new admin wallet.
+By following these steps, you've created a new brand of tokens, minted some to a user, performed various operations, and checked balances. This walkthrough demonstrates the basic functionality of the Solana Points System.
 
 ## Notes
 
 - All operations are performed on the Solana devnet. Do not use real funds.
-- For demo purposes, the admin wallet (`admin_keypair.json`): `GWbuU4p4arBy14MLKDMYoQQoWiHzn93B2WdAw72nbyBM` is already provided.
+- For demo purposes, an admin wallet (`admin_keypair.json`) is already provided.
 - Make sure the admin wallet has sufficient SOL to perform operations.
 - Created user keypairs are stored in the `user_keypairs` directory.
 - In a production environment, users would create their own wallets and provide their public keys.
